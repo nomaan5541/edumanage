@@ -12,29 +12,29 @@ Academic Years/Classes/Sections/Subjects — PARTIAL — impl: full CRUD via Set
 Audit Logs — PARTIAL — impl: write_audit_log() RPC, called from create_school_bootstrap — db: audit_logs table, append-only grants — RLS: select-only policy written — roles: super_admin, school_admin — routes: no viewer UI yet — issues: no audit log viewer page yet.
 
 ## Student & Teacher
-Student Master + Admissions — REQUIRED — not started.
-Student Documents/Photo — REQUIRED — not started.
-Student Promotion — REQUIRED — not started.
-Student Transfer — REQUIRED — not started.
-Teacher Management + Assignments — REQUIRED — not started.
-Teacher One-Session Security — REQUIRED — not started.
+Student Master + Admissions — REQUIRED — dispatched to Warp Factory task (run https://platform.warp.dev/sLAxqZv4PNlhFvGfh0jCrk/runs/01a0a622-91d2-7755-ba6d-4ff8bdfc10d1, "Students & Teachers module").
+Student Documents/Photo — REQUIRED — same Factory task as above.
+Student Promotion — REQUIRED — same Factory task as above.
+Student Transfer — REQUIRED — same Factory task as above.
+Teacher Management + Assignments — REQUIRED — same Factory task as above.
+Teacher One-Session Security — REQUIRED — same Factory task as above.
 
 ## Financial
-Fees/Fee Structures/Payments — REQUIRED — not started.
-Receipts (PDF) — REQUIRED — not started.
-Subscription (manual Super Admin activation) — REQUIRED — not started.
+Fees/Fee Structures/Payments — REQUIRED — dispatched to Warp Factory task (run https://platform.warp.dev/sLAxqZv4PNlhFvGfh0jCrk/runs/01a0a622-c3d5-70cf-b94d-cfa8f6ce3bcf, "Fees & Subscriptions module").
+Receipts (PDF) — REQUIRED — same Factory task as above.
+Subscription (manual Super Admin activation) — REQUIRED — same Factory task as above.
 
 ## Assessment/Attendance
-Attendance — REQUIRED — not started.
-Offline Exams + Marks — REQUIRED — not started.
+Attendance — REQUIRED — dispatched to Warp Factory task (run https://platform.warp.dev/sLAxqZv4PNlhFvGfh0jCrk/runs/01a0a622-fa4e-7c57-bfd6-831730f4776a, "Attendance & Offline Exams module").
+Offline Exams + Marks — REQUIRED — same Factory task as above.
 
 ## Communication/Admin Tooling
-Homework + Study Materials — REQUIRED — not started.
-Timetable — REQUIRED — not started.
-Notifications (in-app/email; SMS/push stubbed) — REQUIRED — not started.
-Backup/Restore — REQUIRED — not started.
-Reports & Exports — REQUIRED — not started.
-Super Admin Platform Dashboard — REQUIRED — not started.
+Homework + Study Materials — REQUIRED — dispatched to Warp Factory task (run https://platform.warp.dev/sLAxqZv4PNlhFvGfh0jCrk/runs/01a0a623-30cb-7478-8446-6da7235bd4dd, "Communication & Admin Tooling module").
+Timetable — REQUIRED — same Factory task as above.
+Notifications (in-app/email; SMS/push stubbed) — REQUIRED — same Factory task as above.
+Backup/Restore — REQUIRED — same Factory task as above.
+Reports & Exports — REQUIRED — same Factory task as above.
+Super Admin Platform Dashboard — REQUIRED — same Factory task as above.
 PWA/offline support — PARTIAL — impl: Vite PWA plugin configured (manifest, safe-caching denylist for API/auth/storage/functions routes) — db: n/a — RLS: n/a — roles: all — routes: n/a — tests: none yet — issues: icons not generated, install prompt UI not built.
 
 ## Deferred (Phase 2+, not started, intentionally out of scope)

@@ -44,7 +44,7 @@ Online Exam Engine, Report Cards & AI Report Cards, Face Attendance, Meetings + 
 4. Final validation pass against the relevant Spec acceptance tests; update `docs/status.md`.
 
 ## Orchestration
-Foundation is built by the orchestrator first; four child agents (`students-teachers`, `fees-subscriptions`, `attendance-exams`, `communication-admin`) then build independent modules in parallel local git worktrees, each adding only new files/migrations. Orchestrator merges sequentially and validates.
+Foundation was built directly (schema/RLS/RBAC/auth/setup wizard/design system), then pushed to `nomaan5541/edumanage` on GitHub. The remaining four Phase 1 modules were handed to a real **Warp Factory** ("EduManage", factory_uid `sLAxqZv4PNlhFvGfh0jCrk`, https://platform.warp.dev/sLAxqZv4PNlhFvGfh0jCrk/dashboard) as four separate tasks instead of local `run_agents` worktrees, using the default agent roster (Foreman/Triage/Spec/Implement/Review). Each task references `docs/conventions/BACKEND_CONVENTIONS.md` and the `.agents/skills/edumanage-*` skills so the Factory's agents follow the same authorization/RLS/testing patterns as the foundation. Merge safety (build/lint/`supabase db reset`/RLS re-check) still applies per `.agents/skills/edumanage-merge-safety` before any Factory PR lands on `main`.
 
 ## Validation & Acceptance
 - `npm run build`, typecheck, lint after every merge.
