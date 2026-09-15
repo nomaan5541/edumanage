@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "factory-setup": {
+      "source": "warpdotdev/warp-factories-skills",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/factory-setup/SKILL.md",
+      "computedHash": "750ff6793466b114bc59b9d4b8295b9f022e50ec63a7cb24e79596506a51546e"
+    }
+  }
+}
