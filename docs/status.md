@@ -37,8 +37,21 @@ Reports & Exports — REQUIRED — same Factory task as above.
 Super Admin Platform Dashboard — REQUIRED — same Factory task as above.
 PWA/offline support — PARTIAL — impl: Vite PWA plugin configured (manifest, safe-caching denylist for API/auth/storage/functions routes) — db: n/a — RLS: n/a — roles: all — routes: n/a — tests: none yet — issues: icons not generated, install prompt UI not built.
 
-## Deferred (Phase 2+, not started, intentionally out of scope)
-Online Exam Engine, Report Cards & AI Report Cards, Face Attendance, Meetings + School Calendar, ID Card Studio, Student AI Assistant, AI School Analytics, Google Workspace integration, Flutter Android app, Tauri desktop packaging, automatic/Stripe subscription billing.
+## Phase 2 (in progress via Warp Factory, dispatched 2026-09-15)
+Meetings + School Calendar — REQUIRED — dispatched (run https://platform.warp.dev/sLAxqZv4PNlhFvGfh0jCrk/runs/01a0a627-e619-7540-80c2-bb57eaff6b98). Independent of unmerged Phase 1 tables.
+ID Card Studio (template engine foundation, 5-10 real starter templates, no student data-binding yet) — REQUIRED — dispatched (run https://platform.warp.dev/sLAxqZv4PNlhFvGfh0jCrk/runs/01a0a628-2079-7173-81d4-f7d9928cd5ef). Data-binding to real students deferred until Students & Teachers task merges.
+Tauri desktop packaging — REQUIRED — dispatched (run https://platform.warp.dev/sLAxqZv4PNlhFvGfh0jCrk/runs/01a0a628-5187-7389-9ba8-5b988bcb0f72). Wraps the existing web build, no new business logic.
+
+## Phase 2 (blocked on Phase 1 merge, not yet dispatched)
+Online Exam Engine — REQUIRED — depends on Student + offline Exam tables from the still-in-progress Students & Teachers / Attendance & Offline Exams Factory tasks. Dispatch once those merge to main.
+Report Cards (non-AI) — REQUIRED — depends on Student + Marks/Attendance data. Dispatch once Phase 1 merges.
+
+## Explicitly declined for now (product owner decision, 2026-09-15)
+Student AI Assistant, AI Report Cards, AI School Analytics — SKIPPED — requires a real LLM provider API key the product owner has not provided; revisit once one is available and the underlying student/exam data exists.
+Google Workspace integration (Calendar/Drive/Docs/Sheets) — SKIPPED — requires a Google Cloud OAuth app/credentials not yet created.
+Automatic/Stripe subscription billing — SKIPPED BY DESIGN — Phase 1 intentionally uses manual Super-Admin-only activation instead (Rule 0.8 addendum); do not add Stripe checkout without an explicit future request + real Stripe keys.
+Face Attendance — SKIPPED — biometric data has real privacy/legal implications the product owner chose not to take on now; manual/QR attendance (in the Attendance & Offline Exams task) covers the need.
+Flutter Android app — SKIPPED FOR NOW — separate native codebase/toolchain; product owner wants the web app finished and stabilized first.
 
 ## Environment Notes
 - Frontend foundation (Vite/React/TS/Tailwind/shadcn-style UI/routing/auth context) builds cleanly: `npm run build` and `npm run lint` both pass as of this writing.
