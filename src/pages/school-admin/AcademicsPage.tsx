@@ -100,6 +100,7 @@ export function AcademicsPage() {
         <TabsTrigger value="classes">Classes</TabsTrigger>
         <TabsTrigger value="sections">Sections</TabsTrigger>
         <TabsTrigger value="subjects">Subjects</TabsTrigger>
+        <TabsTrigger value="mapping">Subject Mapping</TabsTrigger>
       </TabsList>
       <TabsContent value="years">
         <AcademicYearsPanel schoolId={schoolId} />
@@ -112,6 +113,9 @@ export function AcademicsPage() {
       </TabsContent>
       <TabsContent value="subjects">
         <SubjectsPanel schoolId={schoolId} />
+      </TabsContent>
+      <TabsContent value="mapping">
+        <SubjectMappingPanel schoolId={schoolId} />
       </TabsContent>
     </Tabs>
   )
@@ -299,6 +303,121 @@ function SectionsPanel({ schoolId }: { schoolId: string }) {
           </div>
         ))}
       </div>
+    </div>
+  )
+}
+
+function SubjectMappingPanel({ schoolId }: { schoolId: string }) {
+  const queryClient = useQueryClient()
+  const { data: years } = useAcademicYears(schoolId)
+  const { data: classes } = useClasses(schoolId)
+  const { data: subjects } = useSubjects(schoolId)
+  const [yearIdOverride, setYearIdOverride] = React.useState('')
+  const [classId, setClassId] = React.useState('')
+
+  // Default to the active academic year until the user explicitly picks one -
+  // derived during render rather than synced via an effect.
+  const yearId = yearIdOverride || years?.find((y) => y.is_active)?.id || years?.[0]?.id || ''
+
+  const { data: mappedSubjectIds } = useQuery({
+    queryKey: ['class-subjects', schoolId, yearId, classId],
+    queryFn: async (): Promise<Set<string>> => {
+      const { data, error } = await supabase
+        .from('class_subjects')
+        .select('subject_id')
+        .eq('school_id', schoolId)
+        .eq('academic_year_id', yearId)
+        .eq('class_id', classId)
+      if (error) throw error
+      return new Set(data.map((row) => row.subject_id))
+    },
+    enabled: !!yearId && !!classId,
+  })
+
+  const toggle = useMutation({
+    mutationFn: async ({ subjectId, next }: { subjectId: string; next: boolean }) => {
+      if (next) {
+        const { error } = await supabase
+          .from('class_subjects')
+          .insert({ school_id: schoolId, academic_year_id: yearId, class_id: classId, subject_id: subjectId })
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from('class_subjects')
+          .delete()
+          .eq('school_id', schoolId)
+          .eq('academic_year_id', yearId)
+          .eq('class_id', classId)
+          .eq('subject_id', subjectId)
+        if (error) throw error
+      }
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['class-subjects', schoolId, yearId, classId] }),
+    onError: (err: Error) => toast.error(err.message || 'Failed to update subject mapping.'),
+  })
+
+  return (
+    <div className="flex flex-col gap-4 pt-4">
+      <Card>
+        <CardContent className="flex flex-wrap items-end gap-3 pt-5">
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground">Academic year</label>
+            <select
+              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+              value={yearId}
+              onChange={(e) => setYearIdOverride(e.target.value)}
+            >
+              {years?.map((y) => (
+                <option key={y.id} value={y.id}>
+                  {y.name}
+                  {y.is_active ? ' (active)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground">Class</label>
+            <select
+              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+              value={classId}
+              onChange={(e) => setClassId(e.target.value)}
+            >
+              <option value="">Select class…</option>
+              {classes?.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {classId && yearId ? (
+        <Card>
+          <CardContent className="flex flex-col gap-2 pt-5">
+            {subjects?.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Add subjects first, then map them here.</p>
+            ) : null}
+            {subjects?.map((s) => {
+              const isMapped = mappedSubjectIds?.has(s.id) ?? false
+              return (
+                <label key={s.id} className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={isMapped}
+                    disabled={toggle.isPending}
+                    onChange={() => toggle.mutate({ subjectId: s.id, next: !isMapped })}
+                  />
+                  <span>{s.name}</span>
+                </label>
+              )
+            })}
+          </CardContent>
+        </Card>
+      ) : (
+        <p className="text-sm text-muted-foreground">Select an academic year and class to map subjects.</p>
+      )}
     </div>
   )
 }

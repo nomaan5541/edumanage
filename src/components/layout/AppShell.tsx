@@ -2,6 +2,7 @@ import { LogOut } from 'lucide-react'
 import * as React from 'react'
 import { NavLink } from 'react-router-dom'
 
+import { InstallPromptButton } from '@/components/pwa/InstallPromptButton'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/lib/auth-context'
@@ -44,6 +45,7 @@ export function AppShell({
             </NavLink>
           ))}
         </nav>
+        <InstallPromptButton />
         <div className="flex items-center gap-3 border-t pt-4">
           <Avatar>
             <AvatarFallback>{initials}</AvatarFallback>

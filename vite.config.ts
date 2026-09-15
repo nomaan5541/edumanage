@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico'],
+      includeAssets: ['favicon.svg', 'pwa-icon.svg'],
       manifest: {
         name: 'EduManage',
         short_name: 'EduManage',
@@ -18,7 +18,12 @@ export default defineConfig({
         theme_color: '#0f172a',
         background_color: '#0f172a',
         display: 'standalone',
-        icons: [],
+        // Placeholder branded icon (SVG, works for install on evergreen browsers).
+        // Swap for real designed 192/512/maskable PNGs once brand assets exist.
+        icons: [
+          { src: 'pwa-icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          { src: 'pwa-icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },
+        ],
       },
       workbox: {
         // Never cache API/auth traffic; only cache the static app shell.
