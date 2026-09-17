@@ -16,6 +16,7 @@ export type TransferStatus = 'pending' | 'accepted' | 'rejected'
 export type PaymentMode = 'cash' | 'card' | 'upi' | 'bank_transfer' | 'cheque' | 'other'
 export type PaymentStatus = 'paid' | 'refunded' | 'cancelled'
 export type SubscriptionRequestStatus = 'pending' | 'approved' | 'rejected'
+export type AttendanceStatus = 'present' | 'absent' | 'late' | 'excused'
 
 export interface Database {
   public: {
@@ -423,6 +424,26 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      attendance: {
+        Row: {
+          id: string
+          school_id: string
+          student_id: string
+          academic_year_id: string
+          class_id: string
+          section_id: string | null
+          attendance_date: string
+          status: AttendanceStatus
+          marked_by: string | null
+          corrected_by: string | null
+          corrected_at: string | null
+          correction_reason: string | null
+          created_at: string
+        }
+        Insert: never // create only via mark_attendance RPC
+        Update: never
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -526,6 +547,44 @@ export interface Database {
       reject_subscription_renewal: {
         Args: { p_request_id: string; p_reason?: string | null }
         Returns: undefined
+      }
+      get_class_attendance: {
+        Args: {
+          p_school_id: string
+          p_academic_year_id: string
+          p_class_id: string
+          p_section_id: string | null
+          p_date: string
+        }
+        Returns: {
+          student_id: string
+          admission_no: string
+          first_name: string
+          last_name: string | null
+          status: AttendanceStatus | null
+        }[]
+      }
+      mark_attendance: {
+        Args: {
+          p_school_id: string
+          p_academic_year_id: string
+          p_class_id: string
+          p_section_id: string | null
+          p_attendance_date: string
+          p_records: { student_id: string; status: AttendanceStatus }[]
+        }
+        Returns: number
+      }
+      get_student_attendance_stats: {
+        Args: { p_school_id: string; p_student_id: string; p_academic_year_id: string; p_month?: string | null }
+        Returns: {
+          total_days: number
+          present_days: number
+          absent_days: number
+          late_days: number
+          excused_days: number
+          percentage: number
+        }[]
       }
     }
     Enums: {

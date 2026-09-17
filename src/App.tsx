@@ -10,6 +10,7 @@ import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
 import { UnauthorizedPage } from '@/pages/auth/UnauthorizedPage'
 import { RoleRedirect } from '@/pages/RoleRedirect'
 import { AcademicsPage } from '@/pages/school-admin/AcademicsPage'
+import { SchoolAdminAttendancePage } from '@/pages/school-admin/attendance/AttendancePage'
 import { FeesPage } from '@/pages/school-admin/fees/FeesPage'
 import { SchoolAdminDashboardPage } from '@/pages/school-admin/SchoolAdminDashboardPage'
 import { SchoolProfilePage } from '@/pages/school-admin/SchoolProfilePage'
@@ -21,8 +22,10 @@ import { AuditLogPage } from '@/pages/shared/AuditLogPage'
 import { SchoolsPage } from '@/pages/super-admin/SchoolsPage'
 import { SubscriptionRequestsPage } from '@/pages/super-admin/SubscriptionRequestsPage'
 import { SuperAdminDashboardPage } from '@/pages/super-admin/SuperAdminDashboardPage'
+import { StudentAttendancePage } from '@/pages/student/AttendancePage'
 import { StudentFeesPage } from '@/pages/student/FeesPage'
 import { StudentDashboardPage } from '@/pages/student/StudentDashboardPage'
+import { TeacherAttendancePage } from '@/pages/teacher/AttendancePage'
 import { TeacherDashboardPage } from '@/pages/teacher/TeacherDashboardPage'
 
 const SUPER_ADMIN_NAV = [
@@ -39,15 +42,20 @@ const SCHOOL_ADMIN_NAV = [
   { label: 'Students', to: '/admin/students' },
   { label: 'Teachers', to: '/admin/teachers' },
   { label: 'Fees', to: '/admin/fees' },
+  { label: 'Attendance', to: '/admin/attendance' },
   { label: 'Sub-Admins', to: '/admin/sub-admins' },
   { label: 'Audit Log', to: '/admin/audit-log' },
   { label: 'Setup Wizard', to: '/admin/setup' },
 ]
 
-const TEACHER_NAV = [{ label: 'Dashboard', to: '/teacher' }]
+const TEACHER_NAV = [
+  { label: 'Dashboard', to: '/teacher' },
+  { label: 'Attendance', to: '/teacher/attendance' },
+]
 const STUDENT_NAV = [
   { label: 'Dashboard', to: '/student' },
   { label: 'Fees', to: '/student/fees' },
+  { label: 'Attendance', to: '/student/attendance' },
 ]
 
 function App() {
@@ -90,6 +98,7 @@ function App() {
             <Route path="students" element={<StudentsPage />} />
             <Route path="teachers" element={<TeachersPage />} />
             <Route path="fees" element={<FeesPage />} />
+            <Route path="attendance" element={<SchoolAdminAttendancePage />} />
             <Route path="sub-admins" element={<SubAdminsPage />} />
             <Route path="audit-log" element={<AuditLogPage />} />
           </Route>
@@ -106,6 +115,7 @@ function App() {
             }
           >
             <Route index element={<TeacherDashboardPage />} />
+            <Route path="attendance" element={<TeacherAttendancePage />} />
           </Route>
 
           <Route
@@ -118,6 +128,7 @@ function App() {
           >
             <Route index element={<StudentDashboardPage />} />
             <Route path="fees" element={<StudentFeesPage />} />
+            <Route path="attendance" element={<StudentAttendancePage />} />
           </Route>
 
           <Route path="*" element={<UnauthorizedPage />} />
