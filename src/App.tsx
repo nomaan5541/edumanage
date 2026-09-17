@@ -8,6 +8,10 @@ import { UnauthorizedPage } from '@/pages/auth/UnauthorizedPage'
 import { RoleRedirect } from '@/pages/RoleRedirect'
 import { SchoolAdminDashboardPage } from '@/pages/school-admin/SchoolAdminDashboardPage'
 import { SetupWizardPage } from '@/pages/school-admin/SetupWizardPage'
+import { StudentsPage } from '@/pages/school-admin/students/StudentsPage'
+import { StudentPromotionPage } from '@/pages/school-admin/students/StudentPromotionPage'
+import { StudentTransfersPage } from '@/pages/school-admin/students/StudentTransfersPage'
+import { TeachersPage } from '@/pages/school-admin/teachers/TeachersPage'
 import { SchoolsPage } from '@/pages/super-admin/SchoolsPage'
 import { SuperAdminDashboardPage } from '@/pages/super-admin/SuperAdminDashboardPage'
 import { StudentDashboardPage } from '@/pages/student/StudentDashboardPage'
@@ -20,6 +24,10 @@ const SUPER_ADMIN_NAV = [
 
 const SCHOOL_ADMIN_NAV = [
   { label: 'Dashboard', to: '/admin' },
+  { label: 'Students', to: '/admin/students' },
+  { label: 'Promotion', to: '/admin/students/promotion' },
+  { label: 'Transfers', to: '/admin/students/transfers' },
+  { label: 'Teachers', to: '/admin/teachers' },
   { label: 'Setup Wizard', to: '/admin/setup' },
 ]
 
@@ -56,6 +64,10 @@ function App() {
             }
           >
             <Route index element={<SchoolAdminDashboardPage />} />
+            <Route path="students" element={<StudentsPage />} />
+            <Route path="students/promotion" element={<StudentPromotionPage />} />
+            <Route path="students/transfers" element={<StudentTransfersPage />} />
+            <Route path="teachers" element={<TeachersPage />} />
             <Route path="setup" element={<SetupWizardPage />} />
           </Route>
 

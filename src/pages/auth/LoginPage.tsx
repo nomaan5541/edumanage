@@ -40,7 +40,9 @@ export function LoginPage() {
     const { error } = await signInWithPassword(values.email, values.password)
     setSubmitting(false)
     if (error) {
-      setServerError('Incorrect email or password.')
+      setServerError(
+        error.includes('active on another device') ? error : 'Incorrect email or password.',
+      )
     }
   }
 

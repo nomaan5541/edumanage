@@ -51,12 +51,30 @@ export function SchoolAdminDashboardPage() {
         <StatCard label="Subjects" value={isLoading ? '—' : (data?.subjects ?? 0)} />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Students, teachers, attendance, and fees</CardTitle>
-          <CardDescription>These modules land as Phase 1 rollout continues — see docs/status.md.</CardDescription>
-        </CardHeader>
-      </Card>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Students</CardTitle>
+            <CardDescription>Admissions, documents, promotion, and transfers.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link to="/admin/students">Open students</Link>
+            </Button>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Teachers</CardTitle>
+            <CardDescription>Staff records and class/section/subject assignments.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link to="/admin/teachers">Open teachers</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }

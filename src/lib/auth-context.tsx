@@ -1,8 +1,31 @@
 import type { Session, User } from '@supabase/supabase-js'
 import * as React from 'react'
 
+import { rpcErrorMessage } from '@/lib/rpc-error'
 import { supabase } from '@/lib/supabase'
 import type { AppRole } from '@/types/database'
+
+function deviceIdentifier() {
+  const key = 'edumanage.device_id'
+  const existing = window.localStorage.getItem(key)
+  if (existing) return existing
+  const created = crypto.randomUUID()
+  window.localStorage.setItem(key, created)
+  return created
+}
+
+async function registerTeacherSessionIfNeeded(userId: string) {
+  const roles = await fetchRoles(userId)
+  if (!roles.some((role) => role.role === 'teacher')) return roles
+  const { error } = await supabase.rpc('register_teacher_session', {
+    p_device_identifier: deviceIdentifier(),
+  })
+  if (error) {
+    await supabase.auth.signOut()
+    throw new Error(rpcErrorMessage(error, 'Your teacher account is active on another device.'))
+  }
+  return roles
+}
 
 export interface ActiveRole {
   role: AppRole
@@ -51,7 +74,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!isMounted) return
       setSession(data.session)
       if (data.session?.user) {
-        setRoles(await fetchRoles(data.session.user.id))
+        try {
+          setRoles(await registerTeacherSessionIfNeeded(data.session.user.id))
+        } catch {
+          setRoles([])
+        }
       }
       setLoading(false)
     }
@@ -61,7 +88,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession)
       if (nextSession?.user) {
-        void fetchRoles(nextSession.user.id).then((r) => isMounted && setRoles(r))
+        void registerTeacherSessionIfNeeded(nextSession.user.id)
+          .then((r) => isMounted && setRoles(r))
+          .catch(() => isMounted && setRoles([]))
       } else {
         setRoles([])
       }
@@ -74,11 +103,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signInWithPassword = React.useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error: error?.message ?? null }
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) return { error: error.message }
+    if (data.user) {
+      try {
+        const nextRoles = await registerTeacherSessionIfNeeded(data.user.id)
+        setRoles(nextRoles)
+      } catch (sessionError) {
+        return { error: rpcErrorMessage(sessionError, 'Your teacher account is active on another device.') }
+      }
+    }
+    return { error: null }
   }, [])
 
   const signOut = React.useCallback(async () => {
+    await supabase.rpc('revoke_current_teacher_session')
     await supabase.auth.signOut()
   }, [])
 
