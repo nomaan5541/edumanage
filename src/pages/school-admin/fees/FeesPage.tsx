@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/lib/auth-context'
+import { exportToCsv } from '@/lib/csv-export'
 import { supabase } from '@/lib/supabase'
 import type { Database } from '@/types/database'
 
@@ -377,6 +378,34 @@ function PaymentsPanel({ schoolId }: { schoolId: string }) {
     onError: (err: Error) => toast.error(err.message || 'Failed to record payment.'),
   })
 
+  const exportPayments = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase
+        .from('fee_payments')
+        .select('receipt_no, amount, payment_mode, status, created_at, student_id')
+        .eq('school_id', schoolId)
+        .eq('academic_year_id', effectiveYearId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data
+    },
+    onSuccess: (data) => {
+      const studentById = new Map((students ?? []).map((s) => [s.id, s]))
+      exportToCsv(
+        'fee-payments',
+        data.map((p) => ({
+          receipt_no: p.receipt_no,
+          student: studentById.has(p.student_id) ? studentName(studentById.get(p.student_id)!) : p.student_id,
+          amount: p.amount,
+          payment_mode: p.payment_mode,
+          status: p.status,
+          date: p.created_at,
+        })),
+      )
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to export payments.'),
+  })
+
   return (
     <div className="flex flex-col gap-4 pt-4">
       <Card>
@@ -410,6 +439,9 @@ function PaymentsPanel({ schoolId }: { schoolId: string }) {
               ))}
             </select>
           </div>
+          <Button variant="outline" onClick={() => exportPayments.mutate()} disabled={exportPayments.isPending}>
+            Export payments CSV
+          </Button>
         </CardContent>
       </Card>
 

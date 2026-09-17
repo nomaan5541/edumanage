@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/lib/auth-context'
+import { exportToCsv } from '@/lib/csv-export'
 import { supabase } from '@/lib/supabase'
 
 interface AcademicYear {
@@ -233,9 +234,33 @@ function RosterPanel({ schoolId }: { schoolId: string }) {
     onError: (err: Error) => toast.error(err.message || 'Failed to admit student.'),
   })
 
+  const exportCsv = () => {
+    exportToCsv(
+      'students',
+      (students ?? []).map((s) => {
+        const enrollment = enrollmentByStudent.get(s.id)
+        const klass = enrollment ? classById.get(enrollment.class_id) : undefined
+        const section = enrollment?.section_id ? sectionById.get(enrollment.section_id) : undefined
+        return {
+          admission_no: s.admission_no,
+          name: fullName(s),
+          class: klass?.name ?? '',
+          section: section?.name ?? '',
+          roll_no: enrollment?.roll_no ?? '',
+          guardian_name: s.guardian_name ?? '',
+          guardian_phone: s.guardian_phone ?? '',
+          status: s.status,
+        }
+      }),
+    )
+  }
+
   return (
     <div className="flex flex-col gap-4 pt-4">
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" onClick={exportCsv} disabled={!students?.length}>
+          Export CSV
+        </Button>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button>Admit student</Button>

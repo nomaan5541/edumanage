@@ -2,9 +2,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { toast } from 'sonner'
 
+import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/lib/auth-context'
+import { exportToCsv } from '@/lib/csv-export'
 import { supabase } from '@/lib/supabase'
 import type { AttendanceStatus, Database } from '@/types/database'
 
@@ -120,6 +122,18 @@ export function SchoolAdminAttendancePage() {
 
   if (!schoolId) return null
 
+  const exportCsv = () => {
+    exportToCsv(
+      `attendance-${date}`,
+      (roster ?? []).map((r) => ({
+        admission_no: r.admission_no,
+        name: `${r.first_name} ${r.last_name ?? ''}`.trim(),
+        status: r.status ?? 'not marked',
+        date,
+      })),
+    )
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <Card>
@@ -181,6 +195,9 @@ export function SchoolAdminAttendancePage() {
               onChange={(e) => setDate(e.target.value)}
             />
           </div>
+          <Button variant="outline" onClick={exportCsv} disabled={!roster?.length}>
+            Export CSV
+          </Button>
         </CardContent>
       </Card>
 
