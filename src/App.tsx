@@ -3,15 +3,21 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { RoleLayout } from '@/components/layout/RoleLayout'
 import { AuthProvider } from '@/lib/auth-context'
+import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
 import { LoginPage } from '@/pages/auth/LoginPage'
+import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
 import { UnauthorizedPage } from '@/pages/auth/UnauthorizedPage'
 import { RoleRedirect } from '@/pages/RoleRedirect'
+import { AcademicsPage } from '@/pages/school-admin/AcademicsPage'
 import { SchoolAdminDashboardPage } from '@/pages/school-admin/SchoolAdminDashboardPage'
+import { SchoolProfilePage } from '@/pages/school-admin/SchoolProfilePage'
 import { SetupWizardPage } from '@/pages/school-admin/SetupWizardPage'
 import { StudentsPage } from '@/pages/school-admin/students/StudentsPage'
 import { StudentPromotionPage } from '@/pages/school-admin/students/StudentPromotionPage'
 import { StudentTransfersPage } from '@/pages/school-admin/students/StudentTransfersPage'
 import { TeachersPage } from '@/pages/school-admin/teachers/TeachersPage'
+import { SubAdminsPage } from '@/pages/school-admin/SubAdminsPage'
+import { AuditLogPage } from '@/pages/shared/AuditLogPage'
 import { SchoolsPage } from '@/pages/super-admin/SchoolsPage'
 import { SuperAdminDashboardPage } from '@/pages/super-admin/SuperAdminDashboardPage'
 import { StudentDashboardPage } from '@/pages/student/StudentDashboardPage'
@@ -20,6 +26,7 @@ import { TeacherDashboardPage } from '@/pages/teacher/TeacherDashboardPage'
 const SUPER_ADMIN_NAV = [
   { label: 'Dashboard', to: '/super-admin' },
   { label: 'Schools', to: '/super-admin/schools' },
+  { label: 'Audit Log', to: '/super-admin/audit-log' },
 ]
 
 const SCHOOL_ADMIN_NAV = [
@@ -28,6 +35,10 @@ const SCHOOL_ADMIN_NAV = [
   { label: 'Promotion', to: '/admin/students/promotion' },
   { label: 'Transfers', to: '/admin/students/transfers' },
   { label: 'Teachers', to: '/admin/teachers' },
+  { label: 'School Profile', to: '/admin/profile' },
+  { label: 'Academics', to: '/admin/academics' },
+  { label: 'Sub-Admins', to: '/admin/sub-admins' },
+  { label: 'Audit Log', to: '/admin/audit-log' },
   { label: 'Setup Wizard', to: '/admin/setup' },
 ]
 
@@ -40,6 +51,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
           <Route path="/" element={<RoleRedirect />} />
 
@@ -53,6 +66,7 @@ function App() {
           >
             <Route index element={<SuperAdminDashboardPage />} />
             <Route path="schools" element={<SchoolsPage />} />
+            <Route path="audit-log" element={<AuditLogPage />} />
           </Route>
 
           <Route
@@ -69,6 +83,10 @@ function App() {
             <Route path="students/transfers" element={<StudentTransfersPage />} />
             <Route path="teachers" element={<TeachersPage />} />
             <Route path="setup" element={<SetupWizardPage />} />
+            <Route path="profile" element={<SchoolProfilePage />} />
+            <Route path="academics" element={<AcademicsPage />} />
+            <Route path="sub-admins" element={<SubAdminsPage />} />
+            <Route path="audit-log" element={<AuditLogPage />} />
           </Route>
 
           <Route

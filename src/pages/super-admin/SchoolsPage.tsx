@@ -169,18 +169,66 @@ export function SchoolsPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {schools?.map((school) => (
-          <Card key={school.id}>
-            <CardHeader>
-              <div className="flex items-center justify-between gap-2">
-                <CardTitle className="text-base">{school.name}</CardTitle>
-                <Badge variant={statusVariant(school.status)}>{school.status}</Badge>
-              </div>
-              <CardDescription>{school.school_code}</CardDescription>
-            </CardHeader>
-            <CardFooter className="text-sm text-muted-foreground">{school.district ?? '—'}</CardFooter>
-          </Card>
+          <SchoolCard key={school.id} school={school} />
         ))}
       </div>
     </div>
+  )
+}
+
+function SchoolCard({ school }: { school: SchoolRow }) {
+  const queryClient = useQueryClient()
+
+  const setStatus = useMutation({
+    mutationFn: async (status: SchoolStatus) => {
+      const { error } = await supabase.from('schools').update({ status }).eq('id', school.id)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast.success('School status updated.')
+      void queryClient.invalidateQueries({ queryKey: ['schools'] })
+      void queryClient.invalidateQueries({ queryKey: ['school-counts'] })
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to update school status.'),
+  })
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between gap-2">
+          <CardTitle className="text-base">{school.name}</CardTitle>
+          <Badge variant={statusVariant(school.status)}>{school.status}</Badge>
+        </div>
+        <CardDescription>{school.school_code}</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-wrap gap-2">
+        {school.status !== 'active' ? (
+          <Button size="sm" variant="outline" disabled={setStatus.isPending} onClick={() => setStatus.mutate('active')}>
+            Activate
+          </Button>
+        ) : null}
+        {school.status !== 'suspended' ? (
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={setStatus.isPending}
+            onClick={() => setStatus.mutate('suspended')}
+          >
+            Suspend
+          </Button>
+        ) : null}
+        {school.status !== 'expired' ? (
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={setStatus.isPending}
+            onClick={() => setStatus.mutate('expired')}
+          >
+            Mark expired
+          </Button>
+        ) : null}
+      </CardContent>
+      <CardFooter className="text-sm text-muted-foreground">{school.district ?? '—'}</CardFooter>
+    </Card>
   )
 }

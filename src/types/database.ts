@@ -55,6 +55,7 @@ export interface Database {
         Row: {
           id: string
           full_name: string | null
+          email: string | null
           phone: string | null
           avatar_url: string | null
           created_at: string
