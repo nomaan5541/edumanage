@@ -10,6 +10,7 @@ import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
 import { UnauthorizedPage } from '@/pages/auth/UnauthorizedPage'
 import { RoleRedirect } from '@/pages/RoleRedirect'
 import { AcademicsPage } from '@/pages/school-admin/AcademicsPage'
+import { FeesPage } from '@/pages/school-admin/fees/FeesPage'
 import { SchoolAdminDashboardPage } from '@/pages/school-admin/SchoolAdminDashboardPage'
 import { SchoolProfilePage } from '@/pages/school-admin/SchoolProfilePage'
 import { SetupWizardPage } from '@/pages/school-admin/SetupWizardPage'
@@ -18,13 +19,16 @@ import { SubAdminsPage } from '@/pages/school-admin/SubAdminsPage'
 import { TeachersPage } from '@/pages/school-admin/teachers/TeachersPage'
 import { AuditLogPage } from '@/pages/shared/AuditLogPage'
 import { SchoolsPage } from '@/pages/super-admin/SchoolsPage'
+import { SubscriptionRequestsPage } from '@/pages/super-admin/SubscriptionRequestsPage'
 import { SuperAdminDashboardPage } from '@/pages/super-admin/SuperAdminDashboardPage'
+import { StudentFeesPage } from '@/pages/student/FeesPage'
 import { StudentDashboardPage } from '@/pages/student/StudentDashboardPage'
 import { TeacherDashboardPage } from '@/pages/teacher/TeacherDashboardPage'
 
 const SUPER_ADMIN_NAV = [
   { label: 'Dashboard', to: '/super-admin' },
   { label: 'Schools', to: '/super-admin/schools' },
+  { label: 'Subscription Requests', to: '/super-admin/subscription-requests' },
   { label: 'Audit Log', to: '/super-admin/audit-log' },
 ]
 
@@ -34,13 +38,17 @@ const SCHOOL_ADMIN_NAV = [
   { label: 'Academics', to: '/admin/academics' },
   { label: 'Students', to: '/admin/students' },
   { label: 'Teachers', to: '/admin/teachers' },
+  { label: 'Fees', to: '/admin/fees' },
   { label: 'Sub-Admins', to: '/admin/sub-admins' },
   { label: 'Audit Log', to: '/admin/audit-log' },
   { label: 'Setup Wizard', to: '/admin/setup' },
 ]
 
 const TEACHER_NAV = [{ label: 'Dashboard', to: '/teacher' }]
-const STUDENT_NAV = [{ label: 'Dashboard', to: '/student' }]
+const STUDENT_NAV = [
+  { label: 'Dashboard', to: '/student' },
+  { label: 'Fees', to: '/student/fees' },
+]
 
 function App() {
   return (
@@ -63,6 +71,7 @@ function App() {
           >
             <Route index element={<SuperAdminDashboardPage />} />
             <Route path="schools" element={<SchoolsPage />} />
+            <Route path="subscription-requests" element={<SubscriptionRequestsPage />} />
             <Route path="audit-log" element={<AuditLogPage />} />
           </Route>
 
@@ -80,6 +89,7 @@ function App() {
             <Route path="academics" element={<AcademicsPage />} />
             <Route path="students" element={<StudentsPage />} />
             <Route path="teachers" element={<TeachersPage />} />
+            <Route path="fees" element={<FeesPage />} />
             <Route path="sub-admins" element={<SubAdminsPage />} />
             <Route path="audit-log" element={<AuditLogPage />} />
           </Route>
@@ -107,6 +117,7 @@ function App() {
             }
           >
             <Route index element={<StudentDashboardPage />} />
+            <Route path="fees" element={<StudentFeesPage />} />
           </Route>
 
           <Route path="*" element={<UnauthorizedPage />} />

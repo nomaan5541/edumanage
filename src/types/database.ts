@@ -13,6 +13,9 @@ export type EnrollmentStatus = 'active' | 'promoted' | 'transferred' | 'archived
 export type TeacherStatus = 'active' | 'inactive'
 export type TeacherSessionStatus = 'active' | 'revoked'
 export type TransferStatus = 'pending' | 'accepted' | 'rejected'
+export type PaymentMode = 'cash' | 'card' | 'upi' | 'bank_transfer' | 'cheque' | 'other'
+export type PaymentStatus = 'paid' | 'refunded' | 'cancelled'
+export type SubscriptionRequestStatus = 'pending' | 'approved' | 'rejected'
 
 export interface Database {
   public: {
@@ -334,6 +337,92 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      fee_types: {
+        Row: { id: string; school_id: string; name: string; description: string | null; created_at: string }
+        Insert: Partial<Database['public']['Tables']['fee_types']['Row']> & { school_id: string; name: string }
+        Update: Partial<Database['public']['Tables']['fee_types']['Row']>
+        Relationships: []
+      }
+      fee_structures: {
+        Row: {
+          id: string
+          school_id: string
+          academic_year_id: string
+          class_id: string
+          fee_type_id: string
+          amount: number
+          due_date: string | null
+          created_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['fee_structures']['Row']> & {
+          school_id: string
+          academic_year_id: string
+          class_id: string
+          fee_type_id: string
+          amount: number
+        }
+        Update: Partial<Database['public']['Tables']['fee_structures']['Row']>
+        Relationships: []
+      }
+      student_fee_adjustments: {
+        Row: {
+          id: string
+          school_id: string
+          student_id: string
+          academic_year_id: string
+          fee_type_id: string
+          discount_amount: number
+          concession_amount: number
+          fine_amount: number
+          reason: string | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['student_fee_adjustments']['Row']> & {
+          school_id: string
+          student_id: string
+          academic_year_id: string
+          fee_type_id: string
+        }
+        Update: Partial<Database['public']['Tables']['student_fee_adjustments']['Row']>
+        Relationships: []
+      }
+      fee_payments: {
+        Row: {
+          id: string
+          school_id: string
+          student_id: string
+          academic_year_id: string
+          fee_type_id: string
+          amount: number
+          payment_mode: PaymentMode
+          status: PaymentStatus
+          idempotency_key: string | null
+          receipt_no: string
+          recorded_by: string | null
+          created_at: string
+        }
+        Insert: never // create only via record_fee_payment RPC
+        Update: never
+        Relationships: []
+      }
+      subscription_requests: {
+        Row: {
+          id: string
+          school_id: string
+          plan_name: string
+          requested_by: string | null
+          requested_at: string
+          status: SubscriptionRequestStatus
+          notes: string | null
+          resolved_by: string | null
+          resolved_at: string | null
+          resolution_notes: string | null
+        }
+        Insert: never // create only via request_subscription_renewal RPC
+        Update: never
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -400,6 +489,43 @@ export interface Database {
       is_teacher_session_active: {
         Args: { p_device_id: string }
         Returns: boolean
+      }
+      get_student_fee_summary: {
+        Args: { p_school_id: string; p_student_id: string; p_academic_year_id: string }
+        Returns: {
+          fee_type_id: string
+          fee_type_name: string
+          total_due: number
+          fines: number
+          discounts: number
+          concessions: number
+          verified_payments: number
+          outstanding: number
+        }[]
+      }
+      record_fee_payment: {
+        Args: {
+          p_school_id: string
+          p_student_id: string
+          p_academic_year_id: string
+          p_fee_type_id: string
+          p_amount: number
+          p_payment_mode: string
+          p_idempotency_key?: string | null
+        }
+        Returns: Database['public']['Tables']['fee_payments']['Row']
+      }
+      request_subscription_renewal: {
+        Args: { p_school_id: string; p_plan_name?: string; p_notes?: string | null }
+        Returns: string
+      }
+      approve_subscription_renewal: {
+        Args: { p_request_id: string; p_expiry_date: string; p_plan_name?: string | null }
+        Returns: undefined
+      }
+      reject_subscription_renewal: {
+        Args: { p_request_id: string; p_reason?: string | null }
+        Returns: undefined
       }
     }
     Enums: {
