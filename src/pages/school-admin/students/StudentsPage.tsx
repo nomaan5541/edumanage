@@ -142,12 +142,16 @@ export function StudentsPage() {
       <TabsList>
         <TabsTrigger value="roster">Students</TabsTrigger>
         <TabsTrigger value="promotion">Promotion</TabsTrigger>
+        <TabsTrigger value="transfer">Transfer</TabsTrigger>
       </TabsList>
       <TabsContent value="roster">
         <RosterPanel schoolId={schoolId} />
       </TabsContent>
       <TabsContent value="promotion">
         <PromotionPanel schoolId={schoolId} />
+      </TabsContent>
+      <TabsContent value="transfer">
+        <TransferPanel schoolId={schoolId} />
       </TabsContent>
     </Tabs>
   )
@@ -177,6 +181,7 @@ function RosterPanel({ schoolId }: { schoolId: string }) {
   const { data: students, isLoading } = useStudents(schoolId)
   const { data: enrollments } = useActiveEnrollments(schoolId)
   const [open, setOpen] = React.useState(false)
+  const [docsStudentId, setDocsStudentId] = React.useState<string | null>(null)
 
   const enrollmentByStudent = React.useMemo(
     () => new Map((enrollments ?? []).map((e) => [e.student_id, e])),
@@ -381,12 +386,119 @@ function RosterPanel({ schoolId }: { schoolId: string }) {
                     Guardian: {s.guardian_name} {s.guardian_phone ? `(${s.guardian_phone})` : ''}
                   </p>
                 ) : null}
+                <Button variant="outline" size="sm" className="mt-2 w-fit" onClick={() => setDocsStudentId(s.id)}>
+                  Documents
+                </Button>
               </CardContent>
             </Card>
           )
         })}
       </div>
+
+      {docsStudentId ? (
+        <StudentDocumentsDialog schoolId={schoolId} studentId={docsStudentId} onClose={() => setDocsStudentId(null)} />
+      ) : null}
     </div>
+  )
+}
+
+interface DocumentRow {
+  id: string
+  doc_type: string
+  storage_path: string
+  file_size: number | null
+  mime_type: string | null
+  created_at: string
+}
+
+function StudentDocumentsDialog({
+  schoolId,
+  studentId,
+  onClose,
+}: {
+  schoolId: string
+  studentId: string
+  onClose: () => void
+}) {
+  const queryClient = useQueryClient()
+  const [docType, setDocType] = React.useState('')
+  const [file, setFile] = React.useState<File | null>(null)
+
+  const { data: documents, isLoading } = useQuery({
+    queryKey: ['student-documents', studentId],
+    queryFn: async (): Promise<DocumentRow[]> => {
+      const { data, error } = await supabase
+        .from('student_documents')
+        .select('id, doc_type, storage_path, file_size, mime_type, created_at')
+        .eq('student_id', studentId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data
+    },
+  })
+
+  const upload = useMutation({
+    mutationFn: async () => {
+      if (!file || !docType) throw new Error('Pick a document type and a file.')
+      const path = `${schoolId}/${studentId}/${Date.now()}-${file.name}`
+      const { error: uploadErr } = await supabase.storage.from('student-documents').upload(path, file)
+      if (uploadErr) throw uploadErr
+
+      const { error } = await supabase.from('student_documents').insert({
+        school_id: schoolId,
+        student_id: studentId,
+        doc_type: docType,
+        storage_path: path,
+        file_size: file.size,
+        mime_type: file.type,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast.success('Document uploaded.')
+      setDocType('')
+      setFile(null)
+      void queryClient.invalidateQueries({ queryKey: ['student-documents', studentId] })
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to upload document.'),
+  })
+
+  const download = useMutation({
+    mutationFn: async (path: string) => {
+      const { data, error } = await supabase.storage.from('student-documents').createSignedUrl(path, 60)
+      if (error) throw error
+      return data.signedUrl
+    },
+    onSuccess: (url) => window.open(url, '_blank'),
+  })
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Student documents</DialogTitle>
+          <DialogDescription>Birth certificate, transfer certificate, ID proof, etc.</DialogDescription>
+        </DialogHeader>
+        <div className="flex flex-wrap items-end gap-2">
+          <Input placeholder="Document type" value={docType} onChange={(e) => setDocType(e.target.value)} />
+          <input type="file" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="text-sm" />
+          <Button size="sm" onClick={() => upload.mutate()} disabled={upload.isPending || !file || !docType}>
+            Upload
+          </Button>
+        </div>
+        {isLoading ? <p className="text-sm text-muted-foreground">Loading…</p> : null}
+        <div className="flex flex-col gap-2">
+          {documents?.map((d) => (
+            <div key={d.id} className="flex items-center justify-between rounded-md border p-2 text-sm">
+              <span>{d.doc_type}</span>
+              <Button variant="outline" size="sm" onClick={() => download.mutate(d.storage_path)}>
+                Download
+              </Button>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -510,6 +622,256 @@ function PromotionPanel({ schoolId }: { schoolId: string }) {
             </label>
           )
         })}
+      </div>
+    </div>
+  )
+}
+
+interface SchoolOption {
+  id: string
+  name: string
+}
+interface TransferRow {
+  id: string
+  source_school_id: string
+  destination_school_id: string
+  student_id: string
+  status: string
+  notes: string | null
+  created_at: string
+}
+
+function TransferPanel({ schoolId }: { schoolId: string }) {
+  const queryClient = useQueryClient()
+  const { data: students } = useStudents(schoolId)
+  const { data: years } = useAcademicYears(schoolId)
+  const { data: classes } = useClasses(schoolId)
+  const { data: sections } = useSections(schoolId)
+
+  const { data: schools } = useQuery({
+    queryKey: ['schools-options-transfer'],
+    queryFn: async (): Promise<SchoolOption[]> => {
+      const { data, error } = await supabase.from('schools').select('id, name').neq('id', schoolId)
+      if (error) throw error
+      return data
+    },
+  })
+
+  const { data: outgoing } = useQuery({
+    queryKey: ['outgoing-transfers', schoolId],
+    queryFn: async (): Promise<TransferRow[]> => {
+      const { data, error } = await supabase
+        .from('student_transfers')
+        .select('*')
+        .eq('source_school_id', schoolId)
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data
+    },
+  })
+  const { data: incoming } = useQuery({
+    queryKey: ['incoming-transfers', schoolId],
+    queryFn: async (): Promise<TransferRow[]> => {
+      const { data, error } = await supabase
+        .from('student_transfers')
+        .select('*')
+        .eq('destination_school_id', schoolId)
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+      if (error) throw error
+      return data
+    },
+  })
+
+  const [studentId, setStudentId] = React.useState('')
+  const [destSchoolId, setDestSchoolId] = React.useState('')
+  const [notes, setNotes] = React.useState('')
+
+  const initiate = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('initiate_student_transfer', {
+        p_source_school_id: schoolId,
+        p_student_id: studentId,
+        p_destination_school_id: destSchoolId,
+        p_notes: notes || null,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast.success('Transfer initiated.')
+      setStudentId('')
+      setNotes('')
+      void queryClient.invalidateQueries({ queryKey: ['outgoing-transfers', schoolId] })
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to initiate transfer.'),
+  })
+
+  const [acceptingId, setAcceptingId] = React.useState<string | null>(null)
+  const [newAdmissionNo, setNewAdmissionNo] = React.useState('')
+  const [acceptYear, setAcceptYear] = React.useState('')
+  const [acceptClass, setAcceptClass] = React.useState('')
+  const [acceptSection, setAcceptSection] = React.useState('')
+
+  const accept = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('accept_student_transfer', {
+        p_transfer_id: acceptingId!,
+        p_new_admission_no: newAdmissionNo,
+        p_academic_year_id: acceptYear,
+        p_class_id: acceptClass,
+        p_section_id: acceptSection || null,
+      })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast.success('Transfer accepted.')
+      setAcceptingId(null)
+      setNewAdmissionNo('')
+      void queryClient.invalidateQueries({ queryKey: ['incoming-transfers', schoolId] })
+      void queryClient.invalidateQueries({ queryKey: ['students', schoolId] })
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to accept transfer.'),
+  })
+
+  const reject = useMutation({
+    mutationFn: async (transferId: string) => {
+      const { error } = await supabase.rpc('reject_student_transfer', { p_transfer_id: transferId })
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast.success('Transfer rejected.')
+      void queryClient.invalidateQueries({ queryKey: ['incoming-transfers', schoolId] })
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to reject transfer.'),
+  })
+
+  return (
+    <div className="flex flex-col gap-4 pt-4">
+      <Card>
+        <CardContent className="flex flex-col gap-3 pt-5">
+          <p className="text-sm font-medium">Initiate outgoing transfer</p>
+          <div className="flex flex-wrap items-end gap-2">
+            <select
+              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+              value={studentId}
+              onChange={(e) => setStudentId(e.target.value)}
+            >
+              <option value="">Student…</option>
+              {students?.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {fullName(s)} ({s.admission_no})
+                </option>
+              ))}
+            </select>
+            <select
+              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm"
+              value={destSchoolId}
+              onChange={(e) => setDestSchoolId(e.target.value)}
+            >
+              <option value="">Destination school…</option>
+              {schools?.map((sc) => (
+                <option key={sc.id} value={sc.id}>
+                  {sc.name}
+                </option>
+              ))}
+            </select>
+            <Input placeholder="Notes (optional)" value={notes} onChange={(e) => setNotes(e.target.value)} />
+            <Button onClick={() => initiate.mutate()} disabled={initiate.isPending || !studentId || !destSchoolId}>
+              Initiate
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div>
+        <p className="mb-2 text-sm font-medium">Outgoing transfers</p>
+        <div className="flex flex-col gap-2">
+          {outgoing?.map((t) => (
+            <div key={t.id} className="flex items-center justify-between rounded-md border p-2 text-sm">
+              <span>{fullName(students?.find((s) => s.id === t.student_id) ?? { first_name: 'Student', middle_name: null, last_name: null })}</span>
+              <Badge variant={t.status === 'accepted' ? 'success' : t.status === 'rejected' ? 'destructive' : 'outline'}>
+                {t.status}
+              </Badge>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-2 text-sm font-medium">Incoming transfer requests</p>
+        <div className="flex flex-col gap-2">
+          {incoming?.length === 0 ? <p className="text-sm text-muted-foreground">None pending.</p> : null}
+          {incoming?.map((t) => (
+            <Card key={t.id}>
+              <CardContent className="flex flex-col gap-2 pt-5 text-sm">
+                <span>Transfer request {t.notes ? `- ${t.notes}` : ''}</span>
+                {acceptingId === t.id ? (
+                  <div className="flex flex-wrap items-end gap-2">
+                    <Input
+                      placeholder="New admission no."
+                      value={newAdmissionNo}
+                      onChange={(e) => setNewAdmissionNo(e.target.value)}
+                    />
+                    <select
+                      className="h-9 rounded-md border border-input bg-transparent px-2 text-xs"
+                      value={acceptYear}
+                      onChange={(e) => setAcceptYear(e.target.value)}
+                    >
+                      <option value="">Year…</option>
+                      {years?.map((y) => (
+                        <option key={y.id} value={y.id}>
+                          {y.name}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      className="h-9 rounded-md border border-input bg-transparent px-2 text-xs"
+                      value={acceptClass}
+                      onChange={(e) => setAcceptClass(e.target.value)}
+                    >
+                      <option value="">Class…</option>
+                      {classes?.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      className="h-9 rounded-md border border-input bg-transparent px-2 text-xs"
+                      value={acceptSection}
+                      onChange={(e) => setAcceptSection(e.target.value)}
+                    >
+                      <option value="">Section…</option>
+                      {sections
+                        ?.filter((s) => s.class_id === acceptClass)
+                        .map((s) => (
+                          <option key={s.id} value={s.id}>
+                            {s.name}
+                          </option>
+                        ))}
+                    </select>
+                    <Button
+                      size="sm"
+                      onClick={() => accept.mutate()}
+                      disabled={accept.isPending || !newAdmissionNo || !acceptYear || !acceptClass}
+                    >
+                      Confirm accept
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => setAcceptingId(t.id)}>
+                      Accept
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => reject.mutate(t.id)} disabled={reject.isPending}>
+                      Reject
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
     </div>
   )
