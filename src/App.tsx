@@ -13,6 +13,7 @@ import { AcademicsPage } from '@/pages/school-admin/AcademicsPage'
 import { SchoolAdminAttendancePage } from '@/pages/school-admin/attendance/AttendancePage'
 import { SchoolAdminExamsPage } from '@/pages/school-admin/exams/ExamsPage'
 import { FeesPage } from '@/pages/school-admin/fees/FeesPage'
+import { SchoolAdminNotificationsPage } from '@/pages/school-admin/notifications/NotificationsPage'
 import { SchoolAdminTimetablePage } from '@/pages/school-admin/timetable/TimetablePage'
 import { SchoolAdminDashboardPage } from '@/pages/school-admin/SchoolAdminDashboardPage'
 import { SchoolProfilePage } from '@/pages/school-admin/SchoolProfilePage'
@@ -53,6 +54,7 @@ const SCHOOL_ADMIN_NAV = [
   { label: 'Attendance', to: '/admin/attendance' },
   { label: 'Exams', to: '/admin/exams' },
   { label: 'Timetable', to: '/admin/timetable' },
+  { label: 'Notifications', to: '/admin/notifications' },
   { label: 'Sub-Admins', to: '/admin/sub-admins' },
   { label: 'Audit Log', to: '/admin/audit-log' },
   { label: 'Setup Wizard', to: '/admin/setup' },
@@ -117,6 +119,7 @@ function App() {
             <Route path="attendance" element={<SchoolAdminAttendancePage />} />
             <Route path="exams" element={<SchoolAdminExamsPage />} />
             <Route path="timetable" element={<SchoolAdminTimetablePage />} />
+            <Route path="notifications" element={<SchoolAdminNotificationsPage />} />
             <Route path="sub-admins" element={<SubAdminsPage />} />
             <Route path="audit-log" element={<AuditLogPage />} />
           </Route>

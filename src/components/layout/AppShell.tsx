@@ -2,6 +2,7 @@ import { LogOut } from 'lucide-react'
 import * as React from 'react'
 import { NavLink } from 'react-router-dom'
 
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { InstallPromptButton } from '@/components/pwa/InstallPromptButton'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -61,12 +62,20 @@ export function AppShell({
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="glass-surface sticky top-0 z-10 flex items-center justify-between rounded-none border-b px-6 py-4 md:hidden">
           <span className="font-semibold">EduManage</span>
-          <Button variant="ghost" size="icon" onClick={() => void signOut()} aria-label="Sign out">
-            <LogOut />
-          </Button>
+          <div className="flex items-center gap-1">
+            <NotificationBell />
+            <Button variant="ghost" size="icon" onClick={() => void signOut()} aria-label="Sign out">
+              <LogOut />
+            </Button>
+          </div>
         </header>
         <main className="flex-1 p-6">
-          <h1 className="mb-6 text-2xl font-semibold tracking-tight">{title}</h1>
+          <div className="mb-6 flex items-center justify-between">
+            <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+            <div className="hidden md:block">
+              <NotificationBell />
+            </div>
+          </div>
           {children}
         </main>
       </div>

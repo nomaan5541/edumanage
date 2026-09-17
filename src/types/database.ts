@@ -569,6 +569,32 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      notifications: {
+        Row: {
+          id: string
+          school_id: string
+          sender_id: string | null
+          title: string
+          body: string
+          notification_type: string
+          target_type: 'school' | 'role' | 'class' | 'section' | 'student' | 'teacher'
+          target_role: AppRole | null
+          target_class_id: string | null
+          target_section_id: string | null
+          target_student_id: string | null
+          target_teacher_id: string | null
+          created_at: string
+        }
+        Insert: never // create only via send_notification RPC
+        Update: never
+        Relationships: []
+      }
+      notification_reads: {
+        Row: { id: string; notification_id: string; user_id: string; read_at: string }
+        Insert: { notification_id: string; user_id: string; read_at?: string }
+        Update: never
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -764,6 +790,37 @@ export interface Database {
           p_room?: string | null
         }
         Returns: string
+      }
+      send_notification: {
+        Args: {
+          p_school_id: string
+          p_title: string
+          p_body: string
+          p_target_type: 'school' | 'role' | 'class' | 'section' | 'student' | 'teacher'
+          p_notification_type?: string
+          p_target_role?: AppRole | null
+          p_target_class_id?: string | null
+          p_target_section_id?: string | null
+          p_target_student_id?: string | null
+          p_target_teacher_id?: string | null
+        }
+        Returns: string
+      }
+      get_my_notifications: {
+        Args: { p_school_id: string; p_limit?: number }
+        Returns: {
+          id: string
+          title: string
+          body: string
+          notification_type: string
+          target_type: string
+          created_at: string
+          is_read: boolean
+        }[]
+      }
+      mark_notification_read: {
+        Args: { p_notification_id: string }
+        Returns: undefined
       }
     }
     Enums: {
