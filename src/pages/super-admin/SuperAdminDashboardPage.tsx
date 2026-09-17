@@ -13,8 +13,22 @@ async function fetchSchoolCounts() {
   return counts
 }
 
+async function fetchPlatformMetrics() {
+  const [{ count: students }, { count: teachers }, { data: payments }] = await Promise.all([
+    supabase.from('students').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+    supabase.from('teachers').select('id', { count: 'exact', head: true }).eq('status', 'active'),
+    supabase.from('fee_payments').select('amount'),
+  ])
+  const revenue = (payments ?? []).reduce((sum, p) => sum + Number(p.amount), 0)
+  return { students: students ?? 0, teachers: teachers ?? 0, revenue }
+}
+
 export function SuperAdminDashboardPage() {
   const { data, isLoading, error } = useQuery({ queryKey: ['school-counts'], queryFn: fetchSchoolCounts })
+  const { data: metrics, isLoading: metricsLoading } = useQuery({
+    queryKey: ['platform-metrics'],
+    queryFn: fetchPlatformMetrics,
+  })
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -22,6 +36,12 @@ export function SuperAdminDashboardPage() {
       <StatCard label="Active" value={isLoading ? '—' : (data?.active ?? 0)} />
       <StatCard label="Suspended" value={isLoading ? '—' : (data?.suspended ?? 0)} />
       <StatCard label="Expired" value={isLoading ? '—' : (data?.expired ?? 0)} />
+      <StatCard label="Total students" value={metricsLoading ? '—' : (metrics?.students ?? 0)} />
+      <StatCard label="Total teachers" value={metricsLoading ? '—' : (metrics?.teachers ?? 0)} />
+      <StatCard
+        label="Total revenue collected"
+        value={metricsLoading ? '—' : `₹${metrics?.revenue.toLocaleString() ?? 0}`}
+      />
       {error ? (
         <Card className="sm:col-span-2 lg:col-span-4">
           <CardContent className="pt-5 text-sm text-destructive">
@@ -29,15 +49,6 @@ export function SuperAdminDashboardPage() {
           </CardContent>
         </Card>
       ) : null}
-      <Card className="sm:col-span-2 lg:col-span-4">
-        <CardHeader>
-          <CardTitle>Students, teachers, and revenue metrics</CardTitle>
-          <CardDescription>
-            These will appear here once the Student, Teacher, and Fees modules are built (Phase 1 rollout in
-            progress) — see docs/status.md.
-          </CardDescription>
-        </CardHeader>
-      </Card>
     </div>
   )
 }
