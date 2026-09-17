@@ -37,8 +37,11 @@ Reports & Exports — REQUIRED — same Factory task as above.
 Super Admin Platform Dashboard — REQUIRED — same Factory task as above.
 PWA/offline support — PARTIAL — impl: Vite PWA plugin configured (manifest, safe-caching denylist for API/auth/storage/functions routes) — db: n/a — RLS: n/a — roles: all — routes: n/a — tests: none yet — issues: icons not generated, install prompt UI not built.
 
+## Desktop (Phase 2 packaging, requested)
+Tauri desktop shell — PARTIAL — impl: official Tauri 2 window around the existing Vite/React app (`src-tauri/` loads `../dist`; `npm run tauri:dev` / `tauri:build`); 1280×800 window with min 1024×640; placeholder icons; Rust is window-only (no Supabase, RLS, or permission checks) — db: n/a — RLS: n/a (same server-side rules as web) — roles: all (same routes as web, including `/login`) — tests: `npm run test:desktop` (config validation); `npm run build` and `npm run lint` for the web target — issues: not CURRENT. No hosted Supabase project / `.env`, so live login-to-API was not proven. Bundles are unsigned (no Apple/Windows signing). A Linux `tauri build` in this task produced unsigned deb/rpm/AppImage; the window titled EduManage opened, but the webview body was blank so the login form was not proven. CSP was since set to Tauri’s default `null` (strict `script-src 'self'` is the likely blank-screen cause) and Tauri Vite builds use relative `base`. This resume sandbox has no `rustc`/`cargo`; the binary was not rebuilt here. Do not treat scaffolding as a signed installer or as a proven login UI.
+
 ## Deferred (Phase 2+, not started, intentionally out of scope)
-Online Exam Engine, Report Cards & AI Report Cards, Face Attendance, Meetings + School Calendar, ID Card Studio, Student AI Assistant, AI School Analytics, Google Workspace integration, Flutter Android app, Tauri desktop packaging, automatic/Stripe subscription billing.
+Online Exam Engine, Report Cards & AI Report Cards, Face Attendance, Meetings + School Calendar, ID Card Studio, Student AI Assistant, AI School Analytics, Google Workspace integration, Flutter Android app, automatic/Stripe subscription billing.
 
 ## Environment Notes
 - Frontend foundation (Vite/React/TS/Tailwind/shadcn-style UI/routing/auth context) builds cleanly: `npm run build` and `npm run lint` both pass as of this writing.
