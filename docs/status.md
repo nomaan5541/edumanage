@@ -53,6 +53,13 @@ Automatic/Stripe subscription billing — SKIPPED BY DESIGN — Phase 1 intentio
 Face Attendance — SKIPPED — biometric data has real privacy/legal implications the product owner chose not to take on now; manual/QR attendance (in the Attendance & Offline Exams task) covers the need.
 Flutter Android app — SKIPPED FOR NOW — separate native codebase/toolchain; product owner wants the web app finished and stabilized first.
 
+## Factory Incident Log
+2026-09-15/17: All 7 dispatched Factory tasks stalled for ~43 hours with zero progress. Root cause diagnosis (via get_task/get_conversation on each task):
+- Students & Teachers, ID Card Studio, Tauri packaging: Implement runs FAILED shortly after reaching a live-database verification step (`npx supabase db reset`) or (for Tauri) likely a Rust/Cargo toolchain step — consistent with the sandbox lacking Docker/the toolchain, the same constraint hit locally during Phase 1 kickoff.
+- Fees & Subscriptions: Foreman correctly identified that Phase 1 fees are student-scoped but `public.students` doesn't exist yet (Students & Teachers hadn't merged) and asked whether to build a minimal student stub or wait — BLOCKED awaiting an answer.
+- Attendance & Offline Exams, Communication & Admin Tooling, Meetings + Calendar: Foreman triaged correctly, recommended a technical spec given cross-module dependencies/ambiguities, and asked for approval to proceed — each ended its run waiting for a reply (shows as "succeeded" but idle, not actually stalled/broken).
+Recovery: answered all 4 pending questions via `message_foreman` (told Fees to wait on Students & Teachers rather than build a duplicate table; approved specs for Attendance and Communication with concrete decisions on Communication's 8 open ambiguities; told Meetings to skip the spec and proceed on defaults) and resumed the 3 failed tasks via `send_task` handback with corrected guidance: don't stall/fail when Docker or a toolchain is unavailable in the sandbox — do best-effort static verification, document honestly what couldn't be tested (PARTIAL not CURRENT per Rule 0.15), and still open the PR. All 7 tasks are REQUEUED as of this writing.
+
 ## Environment Notes
 - Frontend foundation (Vite/React/TS/Tailwind/shadcn-style UI/routing/auth context) builds cleanly: `npm run build` and `npm run lint` both pass as of this writing.
 - No Docker / local Postgres detected in the dev environment — Supabase CLI (`npx supabase`) works, but `supabase start`/`db reset` require Docker Desktop, which is not installed. Migrations are being written and reviewed but NOT executed/verified against a real Postgres instance yet. This must be resolved (install Docker Desktop, or connect a hosted Supabase project) before any module can be marked CURRENT, per Rule 0.15.
