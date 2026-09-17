@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * Config checks for the Tauri desktop shell.
- * Confirms the shell still wraps the existing Vite build and that Rust
- * has not grown a second copy of data-access or authz dependencies.
+ * Static config checks for the Tauri desktop shell.
+ * This does not boot the app, render login, or reach Supabase.
+ * It only confirms the shell still wraps the existing Vite build,
+ * CSP is set, and Rust has not grown data-access or authz dependencies.
  */
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
@@ -47,6 +48,15 @@ if (conf.build?.devUrl !== 'http://localhost:5173') {
 }
 if (conf.productName !== 'EduManage') {
   fail('productName must be EduManage')
+}
+
+const csp = conf.app?.security?.csp
+if (typeof csp !== 'string' || csp.length === 0) {
+  fail('app.security.csp must be a non-empty policy string (null disables CSP)')
+} else {
+  if (!/\bipc:/.test(csp)) fail('csp must allow Tauri IPC (ipc:)')
+  if (!/\bhttps:/.test(csp)) fail('csp must allow HTTPS connect-src for env-driven Supabase')
+  if (!/object-src 'none'/.test(csp)) fail("csp must set object-src 'none'")
 }
 
 const win = conf.app?.windows?.[0]
@@ -97,4 +107,4 @@ if (failures.length > 0) {
   process.exit(1)
 }
 
-console.log('tauri validation passed')
+console.log('tauri static config validation passed')

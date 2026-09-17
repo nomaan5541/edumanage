@@ -38,12 +38,12 @@ Prerequisites (in addition to Node):
 ```bash
 npm run tauri:dev      # starts `npm run dev` and opens a 1280×800 window
 npm run tauri:build    # runs `npm run build`, then bundles dist/ into a native app
-npm run test:desktop   # config checks (same dist, Tauri 2, no Rust data crates)
+npm run test:desktop   # static config checks only — does not boot the app or call Supabase
 ```
 
 The desktop webview uses the same `VITE_*` values baked into the web build at `npm run build` time. Icon files under `src-tauri/icons/` are placeholders — replace them before a store release.
 
-`tauri.conf.json` leaves CSP unset (`null`, Tauri's default) so the Vite module bundle can load and the app can `connect-src` to the env-driven Supabase HTTPS/WSS URL. Tightening CSP is a follow-up, not done here.
+`tauri.conf.json` sets a Content-Security-Policy: scripts/styles from the bundled app, images from self plus HTTPS (school logos in Storage), and `connect-src` limited to Tauri IPC, HTTPS/WSS (the Supabase URL is chosen at web-build time via `VITE_*`, including custom domains), and localhost/`127.0.0.1` for `supabase start`. Remote cleartext HTTP is blocked. If you host Postgres Auth on some other scheme/host, add that origin to `app.security.csp` before shipping.
 
 Installers produced here are **unsigned**. Signing (Apple notarization, Windows Authenticode) is not configured.
 
@@ -57,7 +57,7 @@ Installers produced here are **unsigned**. Signing (Apple notarization, Windows 
 | `npm run preview` | Preview `dist/` |
 | `npm run tauri:dev` | Desktop dev shell |
 | `npm run tauri:build` | Desktop package |
-| `npm run test:desktop` | Tauri config validation |
+| `npm run test:desktop` | Static Tauri config checks (not a GUI/API test) |
 
 ## Project docs
 - `docs/spec/EDUMANAGE_SPEC.md` — full product specification (authoritative)
