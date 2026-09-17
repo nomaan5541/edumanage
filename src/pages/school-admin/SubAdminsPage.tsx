@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -123,6 +124,18 @@ export function SubAdminsPage() {
     onError: (err: Error) => toast.error(err.message || 'Failed to invite Sub-Admin.'),
   })
 
+  const setActive = useMutation({
+    mutationFn: async ({ userRoleId, isActive }: { userRoleId: string; isActive: boolean }) => {
+      const { error } = await supabase.from('user_roles').update({ is_active: isActive }).eq('id', userRoleId)
+      if (error) throw error
+    },
+    onSuccess: () => {
+      toast.success('Sub-Admin updated.')
+      void queryClient.invalidateQueries({ queryKey: ['sub-admins', schoolId] })
+    },
+    onError: (err: Error) => toast.error(err.message || 'Failed to update Sub-Admin.'),
+  })
+
   if (!schoolId) return null
 
   return (
@@ -172,12 +185,23 @@ export function SubAdminsPage() {
         {subAdmins?.map((sa) => (
           <Card key={sa.userRoleId}>
             <CardHeader>
-              <CardTitle className="text-base">{sa.fullName || sa.email || 'Sub-Admin'}</CardTitle>
+              <div className="flex items-center justify-between gap-2">
+                <CardTitle className="text-base">{sa.fullName || sa.email || 'Sub-Admin'}</CardTitle>
+                <Badge variant={sa.isActive ? 'success' : 'outline'}>{sa.isActive ? 'Active' : 'Deactivated'}</Badge>
+              </div>
               <CardDescription>{sa.email}</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={() => setEditingUserId(sa.userId)}>
                 Manage permissions
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={setActive.isPending}
+                onClick={() => setActive.mutate({ userRoleId: sa.userRoleId, isActive: !sa.isActive })}
+              >
+                {sa.isActive ? 'Deactivate' : 'Reactivate'}
               </Button>
             </CardContent>
           </Card>
