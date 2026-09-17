@@ -13,6 +13,7 @@ import { AcademicsPage } from '@/pages/school-admin/AcademicsPage'
 import { SchoolAdminAttendancePage } from '@/pages/school-admin/attendance/AttendancePage'
 import { SchoolAdminExamsPage } from '@/pages/school-admin/exams/ExamsPage'
 import { FeesPage } from '@/pages/school-admin/fees/FeesPage'
+import { SchoolAdminTimetablePage } from '@/pages/school-admin/timetable/TimetablePage'
 import { SchoolAdminDashboardPage } from '@/pages/school-admin/SchoolAdminDashboardPage'
 import { SchoolProfilePage } from '@/pages/school-admin/SchoolProfilePage'
 import { SetupWizardPage } from '@/pages/school-admin/SetupWizardPage'
@@ -28,10 +29,12 @@ import { StudentFeesPage } from '@/pages/student/FeesPage'
 import { StudentHomeworkPage } from '@/pages/student/HomeworkPage'
 import { StudentDashboardPage } from '@/pages/student/StudentDashboardPage'
 import { StudentResultsPage } from '@/pages/student/ResultsPage'
+import { StudentTimetablePage } from '@/pages/student/TimetablePage'
 import { TeacherAttendancePage } from '@/pages/teacher/AttendancePage'
 import { TeacherDashboardPage } from '@/pages/teacher/TeacherDashboardPage'
 import { TeacherExamsPage } from '@/pages/teacher/ExamsPage'
 import { TeacherHomeworkPage } from '@/pages/teacher/HomeworkPage'
+import { TeacherTimetablePage } from '@/pages/teacher/TimetablePage'
 
 const SUPER_ADMIN_NAV = [
   { label: 'Dashboard', to: '/super-admin' },
@@ -49,6 +52,7 @@ const SCHOOL_ADMIN_NAV = [
   { label: 'Fees', to: '/admin/fees' },
   { label: 'Attendance', to: '/admin/attendance' },
   { label: 'Exams', to: '/admin/exams' },
+  { label: 'Timetable', to: '/admin/timetable' },
   { label: 'Sub-Admins', to: '/admin/sub-admins' },
   { label: 'Audit Log', to: '/admin/audit-log' },
   { label: 'Setup Wizard', to: '/admin/setup' },
@@ -59,6 +63,7 @@ const TEACHER_NAV = [
   { label: 'Attendance', to: '/teacher/attendance' },
   { label: 'Exams', to: '/teacher/exams' },
   { label: 'Homework', to: '/teacher/homework' },
+  { label: 'Timetable', to: '/teacher/timetable' },
 ]
 const STUDENT_NAV = [
   { label: 'Dashboard', to: '/student' },
@@ -66,6 +71,7 @@ const STUDENT_NAV = [
   { label: 'Attendance', to: '/student/attendance' },
   { label: 'Results', to: '/student/results' },
   { label: 'Homework', to: '/student/homework' },
+  { label: 'Timetable', to: '/student/timetable' },
 ]
 
 function App() {
@@ -110,6 +116,7 @@ function App() {
             <Route path="fees" element={<FeesPage />} />
             <Route path="attendance" element={<SchoolAdminAttendancePage />} />
             <Route path="exams" element={<SchoolAdminExamsPage />} />
+            <Route path="timetable" element={<SchoolAdminTimetablePage />} />
             <Route path="sub-admins" element={<SubAdminsPage />} />
             <Route path="audit-log" element={<AuditLogPage />} />
           </Route>
@@ -129,6 +136,7 @@ function App() {
             <Route path="attendance" element={<TeacherAttendancePage />} />
             <Route path="exams" element={<TeacherExamsPage />} />
             <Route path="homework" element={<TeacherHomeworkPage />} />
+            <Route path="timetable" element={<TeacherTimetablePage />} />
           </Route>
 
           <Route
@@ -144,6 +152,7 @@ function App() {
             <Route path="attendance" element={<StudentAttendancePage />} />
             <Route path="results" element={<StudentResultsPage />} />
             <Route path="homework" element={<StudentHomeworkPage />} />
+            <Route path="timetable" element={<StudentTimetablePage />} />
           </Route>
 
           <Route path="*" element={<UnauthorizedPage />} />

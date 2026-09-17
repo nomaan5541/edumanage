@@ -531,6 +531,44 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      timetable_slots: {
+        Row: {
+          id: string
+          school_id: string
+          day_of_week: number
+          period_number: number
+          start_time: string
+          end_time: string
+          created_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['timetable_slots']['Row']> & {
+          school_id: string
+          day_of_week: number
+          period_number: number
+          start_time: string
+          end_time: string
+        }
+        Update: never
+        Relationships: []
+      }
+      timetable_entries: {
+        Row: {
+          id: string
+          school_id: string
+          academic_year_id: string
+          slot_id: string
+          class_id: string
+          section_id: string
+          subject_id: string
+          teacher_id: string
+          room: string | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: never // create only via create_timetable_entry RPC
+        Update: never
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -713,6 +751,19 @@ export interface Database {
           remarks: string | null
           exam_date: string
         }[]
+      }
+      create_timetable_entry: {
+        Args: {
+          p_school_id: string
+          p_academic_year_id: string
+          p_slot_id: string
+          p_class_id: string
+          p_section_id: string
+          p_subject_id: string
+          p_teacher_id: string
+          p_room?: string | null
+        }
+        Returns: string
       }
     }
     Enums: {
