@@ -484,6 +484,53 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      homework: {
+        Row: {
+          id: string
+          school_id: string
+          academic_year_id: string
+          class_id: string
+          section_id: string | null
+          subject_id: string
+          title: string
+          description: string | null
+          due_date: string | null
+          attachment_url: string | null
+          created_by: string | null
+          created_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['homework']['Row']> & {
+          school_id: string
+          academic_year_id: string
+          class_id: string
+          subject_id: string
+          title: string
+        }
+        Update: Partial<Database['public']['Tables']['homework']['Row']>
+        Relationships: []
+      }
+      study_materials: {
+        Row: {
+          id: string
+          school_id: string
+          class_id: string | null
+          section_id: string | null
+          subject_id: string | null
+          title: string
+          storage_path: string
+          file_size: number | null
+          mime_type: string | null
+          uploaded_by: string | null
+          created_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['study_materials']['Row']> & {
+          school_id: string
+          title: string
+          storage_path: string
+        }
+        Update: never
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {

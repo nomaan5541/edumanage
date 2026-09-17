@@ -25,11 +25,13 @@ import { SubscriptionRequestsPage } from '@/pages/super-admin/SubscriptionReques
 import { SuperAdminDashboardPage } from '@/pages/super-admin/SuperAdminDashboardPage'
 import { StudentAttendancePage } from '@/pages/student/AttendancePage'
 import { StudentFeesPage } from '@/pages/student/FeesPage'
+import { StudentHomeworkPage } from '@/pages/student/HomeworkPage'
 import { StudentDashboardPage } from '@/pages/student/StudentDashboardPage'
 import { StudentResultsPage } from '@/pages/student/ResultsPage'
 import { TeacherAttendancePage } from '@/pages/teacher/AttendancePage'
 import { TeacherDashboardPage } from '@/pages/teacher/TeacherDashboardPage'
 import { TeacherExamsPage } from '@/pages/teacher/ExamsPage'
+import { TeacherHomeworkPage } from '@/pages/teacher/HomeworkPage'
 
 const SUPER_ADMIN_NAV = [
   { label: 'Dashboard', to: '/super-admin' },
@@ -56,12 +58,14 @@ const TEACHER_NAV = [
   { label: 'Dashboard', to: '/teacher' },
   { label: 'Attendance', to: '/teacher/attendance' },
   { label: 'Exams', to: '/teacher/exams' },
+  { label: 'Homework', to: '/teacher/homework' },
 ]
 const STUDENT_NAV = [
   { label: 'Dashboard', to: '/student' },
   { label: 'Fees', to: '/student/fees' },
   { label: 'Attendance', to: '/student/attendance' },
   { label: 'Results', to: '/student/results' },
+  { label: 'Homework', to: '/student/homework' },
 ]
 
 function App() {
@@ -124,6 +128,7 @@ function App() {
             <Route index element={<TeacherDashboardPage />} />
             <Route path="attendance" element={<TeacherAttendancePage />} />
             <Route path="exams" element={<TeacherExamsPage />} />
+            <Route path="homework" element={<TeacherHomeworkPage />} />
           </Route>
 
           <Route
@@ -138,6 +143,7 @@ function App() {
             <Route path="fees" element={<StudentFeesPage />} />
             <Route path="attendance" element={<StudentAttendancePage />} />
             <Route path="results" element={<StudentResultsPage />} />
+            <Route path="homework" element={<StudentHomeworkPage />} />
           </Route>
 
           <Route path="*" element={<UnauthorizedPage />} />
