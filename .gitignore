@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Tauri / Cargo (src-tauri/.gitignore also covers these)
+src-tauri/target
+src-tauri/gen/schemas
+
 # Environment files may contain secrets — never commit, only .env.example
 .env
 .env.*
