@@ -9,6 +9,8 @@ import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
 import { UnauthorizedPage } from '@/pages/auth/UnauthorizedPage'
 import { RoleRedirect } from '@/pages/RoleRedirect'
 import { AcademicsPage } from '@/pages/school-admin/AcademicsPage'
+import { IdCardEditorPage } from '@/pages/school-admin/IdCardEditorPage'
+import { IdCardsPage } from '@/pages/school-admin/IdCardsPage'
 import { SchoolAdminDashboardPage } from '@/pages/school-admin/SchoolAdminDashboardPage'
 import { SchoolProfilePage } from '@/pages/school-admin/SchoolProfilePage'
 import { SetupWizardPage } from '@/pages/school-admin/SetupWizardPage'
@@ -26,9 +28,10 @@ const SUPER_ADMIN_NAV = [
 ]
 
 const SCHOOL_ADMIN_NAV = [
-  { label: 'Dashboard', to: '/admin' },
+  { label: 'Dashboard', to: '/admin', end: true },
   { label: 'School Profile', to: '/admin/profile' },
   { label: 'Academics', to: '/admin/academics' },
+  { label: 'ID Cards', to: '/admin/id-cards' },
   { label: 'Sub-Admins', to: '/admin/sub-admins' },
   { label: 'Audit Log', to: '/admin/audit-log' },
   { label: 'Setup Wizard', to: '/admin/setup' },
@@ -73,6 +76,9 @@ function App() {
             <Route path="setup" element={<SetupWizardPage />} />
             <Route path="profile" element={<SchoolProfilePage />} />
             <Route path="academics" element={<AcademicsPage />} />
+            <Route path="id-cards" element={<IdCardsPage />} />
+            <Route path="id-cards/new" element={<IdCardEditorPage />} />
+            <Route path="id-cards/:templateId" element={<IdCardEditorPage />} />
             <Route path="sub-admins" element={<SubAdminsPage />} />
             <Route path="audit-log" element={<AuditLogPage />} />
           </Route>

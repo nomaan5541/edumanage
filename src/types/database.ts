@@ -187,6 +187,29 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      id_card_templates: {
+        Row: {
+          id: string
+          school_id: string
+          name: string
+          category: 'student' | 'staff' | 'visitor' | 'other'
+          description: string | null
+          layout: Record<string, unknown>
+          source_starter_key: string | null
+          created_at: string
+          updated_at: string
+          created_by: string | null
+          updated_by: string | null
+        }
+        Insert: Partial<Database['public']['Tables']['id_card_templates']['Row']> & {
+          school_id: string
+          name: string
+          category: 'student' | 'staff' | 'visitor' | 'other'
+          layout: Record<string, unknown>
+        }
+        Update: Partial<Database['public']['Tables']['id_card_templates']['Row']>
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
