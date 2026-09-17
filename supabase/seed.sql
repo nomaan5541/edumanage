@@ -1,0 +1,1 @@
+-- No seed data. Tests insert their own fixtures.

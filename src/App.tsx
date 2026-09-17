@@ -8,6 +8,7 @@ import { LoginPage } from '@/pages/auth/LoginPage'
 import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage'
 import { UnauthorizedPage } from '@/pages/auth/UnauthorizedPage'
 import { RoleRedirect } from '@/pages/RoleRedirect'
+import { FeesPage } from '@/pages/admin/fees/FeesPage'
 import { AcademicsPage } from '@/pages/school-admin/AcademicsPage'
 import { SchoolAdminDashboardPage } from '@/pages/school-admin/SchoolAdminDashboardPage'
 import { SchoolProfilePage } from '@/pages/school-admin/SchoolProfilePage'
@@ -16,12 +17,14 @@ import { SubAdminsPage } from '@/pages/school-admin/SubAdminsPage'
 import { AuditLogPage } from '@/pages/shared/AuditLogPage'
 import { SchoolsPage } from '@/pages/super-admin/SchoolsPage'
 import { SuperAdminDashboardPage } from '@/pages/super-admin/SuperAdminDashboardPage'
+import { SubscriptionsPage } from '@/pages/super-admin/subscriptions/SubscriptionsPage'
 import { StudentDashboardPage } from '@/pages/student/StudentDashboardPage'
 import { TeacherDashboardPage } from '@/pages/teacher/TeacherDashboardPage'
 
 const SUPER_ADMIN_NAV = [
   { label: 'Dashboard', to: '/super-admin' },
   { label: 'Schools', to: '/super-admin/schools' },
+  { label: 'Subscriptions', to: '/super-admin/subscriptions' },
   { label: 'Audit Log', to: '/super-admin/audit-log' },
 ]
 
@@ -29,6 +32,7 @@ const SCHOOL_ADMIN_NAV = [
   { label: 'Dashboard', to: '/admin' },
   { label: 'School Profile', to: '/admin/profile' },
   { label: 'Academics', to: '/admin/academics' },
+  { label: 'Fees', to: '/admin/fees' },
   { label: 'Sub-Admins', to: '/admin/sub-admins' },
   { label: 'Audit Log', to: '/admin/audit-log' },
   { label: 'Setup Wizard', to: '/admin/setup' },
@@ -58,6 +62,7 @@ function App() {
           >
             <Route index element={<SuperAdminDashboardPage />} />
             <Route path="schools" element={<SchoolsPage />} />
+            <Route path="subscriptions" element={<SubscriptionsPage />} />
             <Route path="audit-log" element={<AuditLogPage />} />
           </Route>
 
@@ -73,6 +78,7 @@ function App() {
             <Route path="setup" element={<SetupWizardPage />} />
             <Route path="profile" element={<SchoolProfilePage />} />
             <Route path="academics" element={<AcademicsPage />} />
+            <Route path="fees" element={<FeesPage />} />
             <Route path="sub-admins" element={<SubAdminsPage />} />
             <Route path="audit-log" element={<AuditLogPage />} />
           </Route>

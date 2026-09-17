@@ -153,6 +153,36 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['class_subjects']['Row']>
         Relationships: []
       }
+      fee_types: {
+        Row: {
+          id: string
+          school_id: string
+          name: string
+          description: string | null
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
+      fee_structures: {
+        Row: {
+          id: string
+          school_id: string
+          fee_type_id: string
+          class_id: string
+          academic_year_id: string
+          amount: string
+          due_date: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: []
+      }
       subscriptions: {
         Row: {
           id: string
@@ -200,6 +230,46 @@ export interface Database {
       is_school_read_only: { Args: { target_school_id: string }; Returns: boolean }
       create_school_bootstrap: {
         Args: { p_school: Record<string, unknown>; p_admin_user_id: string; p_admin_email: string }
+        Returns: string
+      }
+      create_fee_type: {
+        Args: { p_school_id: string; p_name: string; p_description?: string | null }
+        Returns: string
+      }
+      update_fee_type: {
+        Args: {
+          p_fee_type_id: string
+          p_name?: string | null
+          p_description?: string | null
+          p_is_active?: boolean | null
+        }
+        Returns: string
+      }
+      create_fee_structure: {
+        Args: {
+          p_school_id: string
+          p_fee_type_id: string
+          p_class_id: string
+          p_academic_year_id: string
+          p_amount: number
+          p_due_date?: string | null
+        }
+        Returns: string
+      }
+      update_fee_structure: {
+        Args: { p_fee_structure_id: string; p_amount?: number | null; p_due_date?: string | null }
+        Returns: string
+      }
+      activate_school_subscription: {
+        Args: { p_school_id: string; p_plan_name: string; p_start_date: string; p_expiry_date: string }
+        Returns: string
+      }
+      extend_school_subscription: {
+        Args: { p_school_id: string; p_expiry_date: string; p_plan_name?: string | null }
+        Returns: string
+      }
+      cancel_school_subscription: {
+        Args: { p_school_id: string }
         Returns: string
       }
     }
