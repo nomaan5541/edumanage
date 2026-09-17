@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { TeacherSessionGuard } from '@/components/auth/TeacherSessionGuard'
 import { RoleLayout } from '@/components/layout/RoleLayout'
 import { AuthProvider } from '@/lib/auth-context'
 import { ForgotPasswordPage } from '@/pages/auth/ForgotPasswordPage'
@@ -12,7 +13,9 @@ import { AcademicsPage } from '@/pages/school-admin/AcademicsPage'
 import { SchoolAdminDashboardPage } from '@/pages/school-admin/SchoolAdminDashboardPage'
 import { SchoolProfilePage } from '@/pages/school-admin/SchoolProfilePage'
 import { SetupWizardPage } from '@/pages/school-admin/SetupWizardPage'
+import { StudentsPage } from '@/pages/school-admin/students/StudentsPage'
 import { SubAdminsPage } from '@/pages/school-admin/SubAdminsPage'
+import { TeachersPage } from '@/pages/school-admin/teachers/TeachersPage'
 import { AuditLogPage } from '@/pages/shared/AuditLogPage'
 import { SchoolsPage } from '@/pages/super-admin/SchoolsPage'
 import { SuperAdminDashboardPage } from '@/pages/super-admin/SuperAdminDashboardPage'
@@ -29,6 +32,8 @@ const SCHOOL_ADMIN_NAV = [
   { label: 'Dashboard', to: '/admin' },
   { label: 'School Profile', to: '/admin/profile' },
   { label: 'Academics', to: '/admin/academics' },
+  { label: 'Students', to: '/admin/students' },
+  { label: 'Teachers', to: '/admin/teachers' },
   { label: 'Sub-Admins', to: '/admin/sub-admins' },
   { label: 'Audit Log', to: '/admin/audit-log' },
   { label: 'Setup Wizard', to: '/admin/setup' },
@@ -73,6 +78,8 @@ function App() {
             <Route path="setup" element={<SetupWizardPage />} />
             <Route path="profile" element={<SchoolProfilePage />} />
             <Route path="academics" element={<AcademicsPage />} />
+            <Route path="students" element={<StudentsPage />} />
+            <Route path="teachers" element={<TeachersPage />} />
             <Route path="sub-admins" element={<SubAdminsPage />} />
             <Route path="audit-log" element={<AuditLogPage />} />
           </Route>
@@ -81,7 +88,10 @@ function App() {
             path="/teacher"
             element={
               <ProtectedRoute allowedRoles={['teacher']}>
-                <RoleLayout title="Teacher" navItems={TEACHER_NAV} />
+                <>
+                  <TeacherSessionGuard />
+                  <RoleLayout title="Teacher" navItems={TEACHER_NAV} />
+                </>
               </ProtectedRoute>
             }
           >

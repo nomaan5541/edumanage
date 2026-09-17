@@ -8,6 +8,11 @@
 export type AppRole = 'super_admin' | 'school_admin' | 'sub_admin' | 'teacher' | 'student'
 export type SchoolStatus = 'active' | 'suspended' | 'expired'
 export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'expired' | 'suspended' | 'cancelled'
+export type StudentStatus = 'active' | 'inactive' | 'transferred' | 'archived'
+export type EnrollmentStatus = 'active' | 'promoted' | 'transferred' | 'archived'
+export type TeacherStatus = 'active' | 'inactive'
+export type TeacherSessionStatus = 'active' | 'revoked'
+export type TransferStatus = 'pending' | 'accepted' | 'rejected'
 
 export interface Database {
   public: {
@@ -187,6 +192,148 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      students: {
+        Row: {
+          id: string
+          school_id: string
+          user_id: string | null
+          admission_no: string
+          admission_date: string
+          first_name: string
+          middle_name: string | null
+          last_name: string | null
+          date_of_birth: string | null
+          gender: string | null
+          blood_group: string | null
+          nationality: string | null
+          address: string | null
+          phone: string | null
+          email: string | null
+          photo_url: string | null
+          guardian_name: string | null
+          guardian_phone: string | null
+          guardian_email: string | null
+          guardian_relationship: string | null
+          status: StudentStatus
+          created_at: string
+          updated_at: string
+        }
+        Insert: never // create only via create_student_admission RPC
+        Update: Partial<Database['public']['Tables']['students']['Row']>
+        Relationships: []
+      }
+      student_enrollments: {
+        Row: {
+          id: string
+          school_id: string
+          student_id: string
+          academic_year_id: string
+          class_id: string
+          section_id: string | null
+          roll_no: string | null
+          status: EnrollmentStatus
+          created_at: string
+        }
+        Insert: never // create only via create_student_admission/promote_students/accept_student_transfer RPCs
+        Update: never
+        Relationships: []
+      }
+      student_documents: {
+        Row: {
+          id: string
+          school_id: string
+          student_id: string
+          doc_type: string
+          storage_path: string
+          file_size: number | null
+          mime_type: string | null
+          uploaded_by: string | null
+          created_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['student_documents']['Row']> & {
+          school_id: string
+          student_id: string
+          doc_type: string
+          storage_path: string
+        }
+        Update: never
+        Relationships: []
+      }
+      teachers: {
+        Row: {
+          id: string
+          school_id: string
+          user_id: string
+          employee_no: string | null
+          full_name: string
+          phone: string | null
+          email: string | null
+          status: TeacherStatus
+          created_at: string
+          updated_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['teachers']['Row']> & {
+          school_id: string
+          user_id: string
+          full_name: string
+        }
+        Update: Partial<Database['public']['Tables']['teachers']['Row']>
+        Relationships: []
+      }
+      teacher_assignments: {
+        Row: {
+          id: string
+          school_id: string
+          teacher_id: string
+          academic_year_id: string
+          class_id: string
+          section_id: string | null
+          subject_id: string | null
+          created_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['teacher_assignments']['Row']> & {
+          school_id: string
+          teacher_id: string
+          academic_year_id: string
+          class_id: string
+        }
+        Update: never
+        Relationships: []
+      }
+      teacher_sessions: {
+        Row: {
+          id: string
+          teacher_id: string
+          user_id: string
+          school_id: string
+          device_id: string
+          created_at: string
+          last_seen_at: string
+          revoked_at: string | null
+          status: TeacherSessionStatus
+        }
+        Insert: never // create only via register_teacher_session RPC
+        Update: never
+        Relationships: []
+      }
+      student_transfers: {
+        Row: {
+          id: string
+          source_school_id: string
+          destination_school_id: string
+          student_id: string
+          destination_student_id: string | null
+          status: TransferStatus
+          notes: string | null
+          requested_by: string | null
+          resolved_by: string | null
+          created_at: string
+          resolved_at: string | null
+        }
+        Insert: never // create only via initiate_student_transfer RPC
+        Update: never
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -202,11 +349,67 @@ export interface Database {
         Args: { p_school: Record<string, unknown>; p_admin_user_id: string; p_admin_email: string }
         Returns: string
       }
+      create_student_admission: {
+        Args: {
+          p_school_id: string
+          p_student: Record<string, unknown>
+          p_academic_year_id: string
+          p_class_id: string
+          p_section_id: string | null
+          p_roll_no?: string | null
+        }
+        Returns: string
+      }
+      promote_students: {
+        Args: {
+          p_school_id: string
+          p_student_ids: string[]
+          p_dest_academic_year_id: string
+          p_dest_class_id: string
+          p_dest_section_id: string | null
+        }
+        Returns: number
+      }
+      initiate_student_transfer: {
+        Args: {
+          p_source_school_id: string
+          p_student_id: string
+          p_destination_school_id: string
+          p_notes?: string | null
+        }
+        Returns: string
+      }
+      accept_student_transfer: {
+        Args: {
+          p_transfer_id: string
+          p_new_admission_no: string
+          p_academic_year_id: string
+          p_class_id: string
+          p_section_id: string | null
+        }
+        Returns: string
+      }
+      reject_student_transfer: {
+        Args: { p_transfer_id: string; p_reason?: string | null }
+        Returns: undefined
+      }
+      register_teacher_session: {
+        Args: { p_device_id: string }
+        Returns: { revoked_previous_session: boolean }
+      }
+      is_teacher_session_active: {
+        Args: { p_device_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: AppRole
       school_status: SchoolStatus
       subscription_status: SubscriptionStatus
+      student_status: StudentStatus
+      enrollment_status: EnrollmentStatus
+      teacher_status: TeacherStatus
+      transfer_status: TransferStatus
     }
     CompositeTypes: Record<string, never>
   }

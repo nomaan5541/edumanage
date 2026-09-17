@@ -1,6 +1,7 @@
 import type { Session, User } from '@supabase/supabase-js'
 import * as React from 'react'
 
+import { getOrCreateDeviceId } from '@/lib/device-id'
 import { supabase } from '@/lib/supabase'
 import type { AppRole } from '@/types/database'
 
@@ -58,10 +59,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     void loadInitialSession()
 
-    const { data: subscription } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: subscription } = supabase.auth.onAuthStateChange((event, nextSession) => {
       setSession(nextSession)
       if (nextSession?.user) {
-        void fetchRoles(nextSession.user.id).then((r) => isMounted && setRoles(r))
+        void fetchRoles(nextSession.user.id).then((r) => {
+          if (!isMounted) return
+          setRoles(r)
+          // Only register a session on a fresh sign-in, not on every token refresh
+          // or tab restore - otherwise we'd needlessly revoke this same device's
+          // own previous session row on every page load (Spec Section 9).
+          if (event === 'SIGNED_IN' && r.some((role) => role.role === 'teacher')) {
+            void supabase.rpc('register_teacher_session', { p_device_id: getOrCreateDeviceId() })
+          }
+        })
       } else {
         setRoles([])
       }
