@@ -17,6 +17,7 @@ export type PaymentMode = 'cash' | 'card' | 'upi' | 'bank_transfer' | 'cheque' |
 export type PaymentStatus = 'paid' | 'refunded' | 'cancelled'
 export type SubscriptionRequestStatus = 'pending' | 'approved' | 'rejected'
 export type AttendanceStatus = 'present' | 'absent' | 'late' | 'excused'
+export type ExamType = 'FA1' | 'FA2' | 'MID' | 'FA3' | 'FA4' | 'FINAL'
 
 export interface Database {
   public: {
@@ -444,6 +445,45 @@ export interface Database {
         Update: never
         Relationships: []
       }
+      exams: {
+        Row: {
+          id: string
+          school_id: string
+          academic_year_id: string
+          class_id: string
+          section_id: string | null
+          subject_id: string
+          exam_type: ExamType
+          name: string
+          max_marks: number
+          exam_date: string
+          duration_minutes: number | null
+          instructions: string | null
+          is_published: boolean
+          created_by: string | null
+          created_at: string
+        }
+        Insert: never // create only via create_exam RPC
+        Update: never
+        Relationships: []
+      }
+      exam_marks: {
+        Row: {
+          id: string
+          school_id: string
+          exam_id: string
+          student_id: string
+          marks_obtained: number
+          remarks: string | null
+          is_locked: boolean
+          entered_by: string | null
+          entered_at: string
+          updated_at: string
+        }
+        Insert: never // create only via upsert_exam_marks RPC
+        Update: never
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -584,6 +624,47 @@ export interface Database {
           late_days: number
           excused_days: number
           percentage: number
+        }[]
+      }
+      create_exam: {
+        Args: {
+          p_school_id: string
+          p_academic_year_id: string
+          p_class_id: string
+          p_section_id: string | null
+          p_subject_id: string
+          p_exam_type: ExamType
+          p_name: string
+          p_max_marks: number
+          p_exam_date: string
+          p_duration_minutes?: number | null
+          p_instructions?: string | null
+        }
+        Returns: string
+      }
+      upsert_exam_marks: {
+        Args: {
+          p_school_id: string
+          p_exam_id: string
+          p_records: { student_id: string; marks_obtained: number; remarks?: string | null }[]
+        }
+        Returns: number
+      }
+      publish_exam_results: {
+        Args: { p_exam_id: string }
+        Returns: undefined
+      }
+      get_student_exam_results: {
+        Args: { p_school_id: string; p_student_id: string; p_academic_year_id: string }
+        Returns: {
+          exam_id: string
+          exam_name: string
+          exam_type: ExamType
+          subject_name: string
+          max_marks: number
+          marks_obtained: number
+          remarks: string | null
+          exam_date: string
         }[]
       }
     }
